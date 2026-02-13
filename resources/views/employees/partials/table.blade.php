@@ -9,7 +9,7 @@
             <table id="employeeTable" class="table table-bordered table-striped align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th width="5%">#</th>
+                        <th width="5%">Sr. No.</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Mobile</th>

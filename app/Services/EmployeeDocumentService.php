@@ -89,18 +89,18 @@ class EmployeeDocumentService
             }
         }
 
-        /* ================= DELETE REMOVED ================= */
-        $employee->documents()
-            // ->whereNotIn('id', $keptIds) TODO
-            ->get()
-            ->each(function ($doc) {
+        /* ================= DELETE REMOVED (Not Required) ================= */
+        // $employee->documents()
+        //     // ->whereNotIn('id', $keptIds) TODO
+        //     ->get()
+        //     ->each(function ($doc) {
 
-                if ($doc->document_file && Storage::disk('public')->exists($doc->document_file)) {
-                    Storage::disk('public')->delete($doc->document_file);
-                }
+        //         if ($doc->document_file && Storage::disk('public')->exists($doc->document_file)) {
+        //             Storage::disk('public')->delete($doc->document_file);
+        //         }
 
-                $doc->delete();
-            });
+        //         $doc->delete();
+        //     });
     }
 
     /* ================= DELETE ALL DOCUMENTS ================= */

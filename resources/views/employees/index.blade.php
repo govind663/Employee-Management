@@ -39,7 +39,6 @@
 </div>
 
 {{-- ================= JS LIBRARIES (ORDER VERY IMPORTANT) ================= --}}
-
 {{-- JQUERY FIRST --}}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 

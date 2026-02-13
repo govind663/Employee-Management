@@ -53,7 +53,22 @@ $(function () {
             { data:'mobile_no' },
             { data:'gender' },
             { data:'designation' },
-            { data:'department', render:d=>d?d.join(', '):'' },
+            // multiple departments ('It' , 'Hr' , 'Sales' , 'Marketing') handling in if else, if more departments added in future then it will automatically handled in else part
+            
+            { data:'department', render: d => {
+                if(!d) return '';
+                if(typeof d === "string"){
+                    try{
+                        d = JSON.parse(d);
+                    } catch(e){
+                        return d; // return as is if not a valid JSON
+                    }
+                }
+                if(Array.isArray(d)){
+                    return d.join(', ');
+                }
+                return d.toString();
+            }},
             { data:'state.name' },
             { data:'city.name' },
             { data:'documents', render: docs=>`
@@ -68,88 +83,87 @@ $(function () {
     });
 
     /* ================= DOCUMENT ROWS (ADD / REMOVE / PREVIEW / VALIDATION) ================= */
-function addDocumentRow(type = '', file = '', docId = '') {
+    function addDocumentRow(type = '', file = '', docId = '') {
 
-    const existingInput = docId
-        ? `<input type="hidden" name="existing_document_file[]" value="${docId}">`
-        : `<input type="hidden" name="existing_document_file[]" value="">`;
+        const existingInput = docId
+            ? `<input type="hidden" name="existing_document_file[]" value="${docId}">`
+            : `<input type="hidden" name="existing_document_file[]" value="">`;
 
-    const filePreview = file
-        ? `<div class="file-preview mt-1">
-                <a href="/storage/${file}" target="_blank">View File</a>
-           </div>`
-        : '';
+        const filePreview = file
+            ? `<div class="file-preview mt-1">
+                    <a href="/storage/${file}" target="_blank">View File</a>
+            </div>`
+            : '';
 
-    const html = `
-    <div class="row document-row mb-2">
-        <div class="col-md-4">
-            <select name="document_type[]" class="form-select">
-                <option value="">Select Document</option>
-                <option value="pan" ${type === 'pan' ? 'selected' : ''}>PAN</option>
-                <option value="aadhaar" ${type === 'aadhaar' ? 'selected' : ''}>Aadhaar</option>
-            </select>
-            <small class="error-text" data-error="document_type"></small>
-        </div>
+        const html = `
+        <div class="row document-row mb-2">
+            <div class="col-md-4">
+                <select name="document_type[]" class="form-select">
+                    <option value="">Select Document</option>
+                    <option value="pan" ${type === 'pan' ? 'selected' : ''}>PAN</option>
+                    <option value="aadhaar" ${type === 'aadhaar' ? 'selected' : ''}>Aadhaar</option>
+                </select>
+                <small class="error-text" data-error="document_type"></small>
+            </div>
 
-        <div class="col-md-5">
-            <input type="file" name="document_file[]" class="form-control">
-            ${filePreview}
-            ${existingInput}
-            <small class="error-text" data-error="document_file"></small>
-        </div>
+            <div class="col-md-5">
+                <input type="file" name="document_file[]" class="form-control">
+                ${filePreview}
+                ${existingInput}
+                <small class="error-text" data-error="document_file"></small>
+            </div>
 
-        <div class="col-md-3">
-            <button type="button" class="btn btn-danger btn-sm removeRow">Remove</button>
-        </div>
-    </div>`;
+            <div class="col-md-3">
+                <button type="button" class="btn btn-danger btn-sm removeRow">Remove</button>
+            </div>
+        </div>`;
 
-    $('#documentWrapper').append(html);
-}
-
-/* ================= ADD BUTTON ================= */
-$('#addDocumentRow').on('click', function () {
-    addDocumentRow();
-});
-
-/* ================= REMOVE ROW ================= */
-$(document).on('click', '.removeRow', function () {
-    $(this).closest('.document-row').remove();
-});
-
-/* ================= FILE INPUT PREVIEW & VALIDATION ================= */
-$(document).on('change', 'input[name="document_file[]"]', function () {
-
-    const row = $(this).closest('.document-row');
-
-    row.find('.file-preview').remove();
-    row.find('[data-error="document_file"]').text('');
-    $(this).removeClass('input-error');
-
-    if (this.files && this.files[0]) {
-
-        const file = this.files[0];
-        const allowedExtensions = ['xls','xlsx','pdf','doc','docx'];
-        const maxSizeMB = 5;
-        const fileExt = file.name.split('.').pop().toLowerCase();
-
-        if (!allowedExtensions.includes(fileExt)) {
-            row.find('[data-error="document_file"]').text('Invalid file type. Only Excel, PDF and Word allowed.');
-            $(this).addClass('input-error');
-            $(this).val('');
-            return;
-        }
-
-        if (file.size > maxSizeMB * 1024 * 1024) {
-            row.find('[data-error="document_file"]').text('File size must not exceed 5MB.');
-            $(this).addClass('input-error');
-            $(this).val('');
-            return;
-        }
-
-        $(this).after(`<div class="file-preview mt-1">${file.name}</div>`);
+        $('#documentWrapper').append(html);
     }
-});
 
+    /* ================= ADD BUTTON ================= */
+    $('#addDocumentRow').on('click', function () {
+        addDocumentRow();
+    });
+
+    /* ================= REMOVE ROW ================= */
+    $(document).on('click', '.removeRow', function () {
+        $(this).closest('.document-row').remove();
+    });
+
+    /* ================= FILE INPUT PREVIEW & VALIDATION ================= */
+    $(document).on('change', 'input[name="document_file[]"]', function () {
+
+        const row = $(this).closest('.document-row');
+
+        row.find('.file-preview').remove();
+        row.find('[data-error="document_file"]').text('');
+        $(this).removeClass('input-error');
+
+        if (this.files && this.files[0]) {
+
+            const file = this.files[0];
+            const allowedExtensions = ['xls','xlsx','pdf','doc','docx'];
+            const maxSizeMB = 5;
+            const fileExt = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(fileExt)) {
+                row.find('[data-error="document_file"]').text('Invalid file type. Only Excel, PDF and Word allowed.');
+                $(this).addClass('input-error');
+                $(this).val('');
+                return;
+            }
+
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                row.find('[data-error="document_file"]').text('File size must not exceed 5MB.');
+                $(this).addClass('input-error');
+                $(this).val('');
+                return;
+            }
+
+            $(this).after(`<div class="file-preview mt-1">${file.name}</div>`);
+        }
+    });
 
     /* ================= FILE INPUT PREVIEW & VALIDATION ================= */
     $(document).on('change', 'input[type="file"]', function () {
@@ -192,89 +206,89 @@ $(document).on('change', 'input[name="document_file[]"]', function () {
 
     function validateForm(){
 
-    let valid = true;
+        let valid = true;
 
-    const fields = [
-        {name:'name', message:'Name is required'},
-        {name:'email_id', message:'Email is required', format:'Invalid email format'},
-        {name:'mobile_no', message:'Mobile number is required', format:'Mobile must be 10 digits'},
-        {name:'gender', message:'Select gender'},
-        {name:'designation', message:'Designation is required'},
-        {name:'state_id', message:'Select state'},
-        {name:'city_id', message:'Select city'},
-        {name:'address', message:'Address is required'}
-    ];
+        const fields = [
+            {name:'name', message:'Name is required'},
+            {name:'email_id', message:'Email is required', format:'Invalid email format'},
+            {name:'mobile_no', message:'Mobile number is required', format:'Mobile must be 10 digits'},
+            {name:'gender', message:'Select gender'},
+            {name:'designation', message:'Designation is required'},
+            {name:'state_id', message:'Select state'},
+            {name:'city_id', message:'Select city'},
+            {name:'address', message:'Address is required'}
+        ];
 
-    /* ================= NORMAL FIELD VALIDATION ================= */
-    fields.forEach(f=>{
+        /* ================= NORMAL FIELD VALIDATION ================= */
+        fields.forEach(f=>{
 
-        const el = $('[name="'+f.name+'"]');
-        let val;
+            const el = $('[name="'+f.name+'"]');
+            let val;
 
-        if(el.is(':radio')){
-            val = $('input[name="'+f.name+'"]:checked').val();
-        }else{
-            val = el.val();
-        }
+            if(el.is(':radio')){
+                val = $('input[name="'+f.name+'"]:checked').val();
+            }else{
+                val = el.val();
+            }
 
-        if(!val){
-            el.addClass('input-error');
-            $('[data-error="'+f.name+'"]').text(f.message);
+            if(!val){
+                el.addClass('input-error');
+                $('[data-error="'+f.name+'"]').text(f.message);
+                valid = false;
+            }else{
+                el.removeClass('input-error');
+                $('[data-error="'+f.name+'"]').text('');
+
+                if(f.name==='email_id' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+                    el.addClass('input-error');
+                    $('[data-error="'+f.name+'"]').text(f.format);
+                    valid = false;
+                }
+
+                if(f.name==='mobile_no' && !/^\d{10}$/.test(val)){
+                    el.addClass('input-error');
+                    $('[data-error="'+f.name+'"]').text(f.format);
+                    valid = false;
+                }
+            }
+        });
+
+        /* ================= DEPARTMENT VALIDATION (FIXED) ================= */
+        const depValues = departmentChoices.getValue(true);
+
+        if(!depValues.length){
+            $('[data-error="department"]').text('Select at least one department');
             valid = false;
         }else{
-            el.removeClass('input-error');
-            $('[data-error="'+f.name+'"]').text('');
-
-            if(f.name==='email_id' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
-                el.addClass('input-error');
-                $('[data-error="'+f.name+'"]').text(f.format);
-                valid = false;
-            }
-
-            if(f.name==='mobile_no' && !/^\d{10}$/.test(val)){
-                el.addClass('input-error');
-                $('[data-error="'+f.name+'"]').text(f.format);
-                valid = false;
-            }
+            $('[data-error="department"]').text('');
         }
-    });
 
-    /* ================= ✅ DEPARTMENT VALIDATION (FIXED) ================= */
-    const depValues = departmentChoices.getValue(true);
+        /* ================= DOCUMENT VALIDATION ================= */
+        $('#documentWrapper .document-row').each(function(i,row){
 
-    if(!depValues.length){
-        $('[data-error="department"]').text('Select at least one department');
-        valid = false;
-    }else{
-        $('[data-error="department"]').text('');
+            const typeSelect = $(row).find('select[name^="document_type"]');
+            const type       = typeSelect.val();
+
+            const fileInput  = $(row).find('input[type="file"]');
+            const file       = fileInput[0].files[0];
+
+            const existing   = $(row).find('input[name^="existing_document_file"]').val();
+
+            if(!type){
+                typeSelect.addClass('input-error');
+                $(row).find('[data-error="document_type"]').text('Please select document type');
+                valid = false;
+            }
+
+            if(!existing && !file){
+                fileInput.addClass('input-error');
+                $(row).find('[data-error="document_file"]').text('Please upload document file');
+                valid = false;
+            }
+        });
+
+        return valid;
     }
-
-    /* ================= DOCUMENT VALIDATION ================= */
-    $('#documentWrapper .document-row').each(function(i,row){
-
-        const typeSelect = $(row).find('select[name^="document_type"]');
-        const type       = typeSelect.val();
-
-        const fileInput  = $(row).find('input[type="file"]');
-        const file       = fileInput[0].files[0];
-
-        const existing   = $(row).find('input[name^="existing_document_file"]').val();
-
-        if(!type){
-            typeSelect.addClass('input-error');
-            $(row).find('[data-error="document_type"]').text('Please select document type');
-            valid = false;
-        }
-
-        if(!existing && !file){
-            fileInput.addClass('input-error');
-            $(row).find('[data-error="document_file"]').text('Please upload document file');
-            valid = false;
-        }
-    });
-
-    return valid;
-}
 
     /* ================= FORM SUBMIT ================= */
     $('#employeeForm').on('submit', function(e){
@@ -399,6 +413,7 @@ $(document).on('change', 'input[name="document_file[]"]', function () {
                 departmentChoices.removeActiveItems();
 
                 let departments = res.department;
+                console.log('DEPARTMENTS FROM BACKEND = ', departments);
 
                 if(typeof departments === "string"){
                     try{
@@ -413,7 +428,14 @@ $(document).on('change', 'input[name="document_file[]"]', function () {
                         let cleanDep = dep.toString().trim();
                         cleanDep = cleanDep.charAt(0).toUpperCase() + cleanDep.slice(1).toLowerCase();
                         departmentChoices.setChoiceByValue(cleanDep);
+
+                        // chek value exists in choices, if not add it dynamically in console
+                        console.log('Checking department choice for value:', cleanDep);
                     });
+                } else {
+                    let cleanDep = departments.toString().trim();
+                    cleanDep = cleanDep.charAt(0).toUpperCase() + cleanDep.slice(1).toLowerCase();
+                    departmentChoices.setChoiceByValue(cleanDep);
                 }
             }
 

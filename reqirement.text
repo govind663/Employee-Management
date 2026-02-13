@@ -1,0 +1,36 @@
+# Laravel 12 Project – Setup Instructions
+
+1. Extract the project zip.
+2. Open terminal in project folder:
+   cd Employee-Management
+3. Install PHP dependencies:
+   composer install
+4. Create .env file and generate key:
+   cp .env.example .env
+   php artisan key:generate
+5. Setup Database:
+   - Create database (e.g., employee_management)
+   - Update DB credentials in .env
+   - Import SQL dump if provided:
+     mysql -u root -p employee_management < employee_management.sql
+6. Setup Storage Link:
+   php artisan storage:link
+   (If already exists, run:
+    rm -rf public/storage
+    php artisan storage:link)
+7. Set permissions (Linux/Ubuntu):
+   sudo chown -R $USER:www-data storage
+   sudo chown -R $USER:www-data bootstrap/cache
+   sudo chmod -R 775 storage
+   sudo chmod -R 775 bootstrap/cache
+8. Install Node dependencies:
+   npm install
+   npm run dev
+9. Clear cache (optional):
+   php artisan config:clear
+   php artisan cache:clear
+   php artisan route:clear
+   php artisan view:clear
+10. Run the project:
+    php artisan serve
+    Open in browser: http://127.0.0.1:8000

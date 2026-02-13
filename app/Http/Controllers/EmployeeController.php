@@ -83,6 +83,11 @@ class EmployeeController extends Controller
     {
         $employee = Employee::with('documents')->findOrFail($id);
 
+        // Decode department for frontend
+        $employee_department = is_string($employee->department) ? json_decode($employee->department, true) ?? [] : $employee->department;
+
+        // dd($employee->department);
+
         return response()->json([
             'employee_id' => $employee->employee_id,
             'name' => $employee->name,
@@ -91,7 +96,7 @@ class EmployeeController extends Controller
             'designation' => $employee->designation,
             'address' => $employee->address,
             'gender' => $employee->gender,
-            'department' => $employee->department ?? [],
+            'department' => $employee_department,
             'state_id' => $employee->state_id,
             'city_id' => $employee->city_id,
             'documents' => $employee->documents,

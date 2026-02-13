@@ -61,7 +61,7 @@
                                     <small class="error-text" data-error="mobile_no"></small>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label>Gender <span class="text-danger">*</span></label><br>
+                                    <label>Gender <span class="text-danger">*</span></label><br> 
                                     <label class="me-3">
                                         <input type="radio" name="gender" value="Male"> Male
                                     </label>
@@ -81,9 +81,9 @@
                                     <select name="department[]" id="department" multiple class="form-select">
                                         <option value="Marketing">Marketing</option>
                                         <option value="Finance">Finance</option>
-                                        <option value="HR">HR</option>
+                                        <option value="Hr">HR</option>
                                         <option value="Sales">Sales</option>
-                                        <option value="IT">IT</option>
+                                        <option value="It">IT</option>
                                     </select>
                                     <small class="error-text" data-error="department"></small>
                                 </div>
